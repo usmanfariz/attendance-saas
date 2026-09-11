@@ -179,6 +179,24 @@ Role     : SUPER_ADMIN
 
 ### 6.1 Lokal (Maven)
 
+**Cara cepat — satu perintah:**
+
+```bash
+./run-local.sh              # profil dev, port 8080
+./run-local.sh prod         # profil prod
+SERVER_PORT=9090 ./run-local.sh
+```
+
+Skrip itu mencari JDK 21 dan Maven sendiri (termasuk yang dipasang user-local di
+`~/.local/share/dev-tools`, untuk mesin tanpa akses root), menimpa `DB_HOST` ke
+loopback, mengisi `JWT_SECRET` pengembangan yang stabil, lalu memeriksa MySQL
+hidup dan port 8080 kosong — keduanya gagal lebih awal dengan pesan yang jelas
+alih-alih stack trace Hikari atau `Address already in use`. Seluruh variabel di
+dalamnya dapat ditimpa lewat environment.
+
+Bagian di bawah menjelaskan langkah manualnya, bila Anda ingin tahu isi skripnya
+atau perlu menyimpang darinya.
+
 Dua hal yang paling sering menggagalkan langkah ini:
 
 1. **Jalankan dari dalam folder proyek** (yang berisi `pom.xml`). Dari folder
@@ -210,6 +228,16 @@ Belum punya JDK 21:
 ```bash
 sudo apt install -y openjdk-21-jdk
 sudo update-alternatives --config java    # pilih yang versi 21
+```
+
+Tanpa akses root, pasang user-local dan arahkan `JAVA_HOME` ke sana — ini yang
+dilakukan `run-local.sh` secara otomatis:
+
+```bash
+mkdir -p ~/.local/share/dev-tools && cd ~/.local/share/dev-tools
+# Unduh Temurin JDK 21 dan Apache Maven, lalu ekstrak di sini
+export JAVA_HOME=~/.local/share/dev-tools/jdk-21.0.12.1+1
+export PATH="$JAVA_HOME/bin:~/.local/share/dev-tools/apache-maven-3.9.16/bin:$PATH"
 ```
 
 Alternatif tanpa Maven, langsung dari jar yang sudah di-build:
